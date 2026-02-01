@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: qinghe-system
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+qinghe:
+  info:
+    base-package: cn.qinghe.mall

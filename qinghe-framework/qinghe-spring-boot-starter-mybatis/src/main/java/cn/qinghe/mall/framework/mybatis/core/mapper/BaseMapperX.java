@@ -1,0 +1,33 @@
+package cn.qinghe.mall.framework.mybatis.core.mapper;
+
+import cn.hutool.core.util.PageUtil;
+import cn.qinghe.mall.framework.common.pojo.PageParam;
+import cn.qinghe.mall.framework.common.pojo.PageResult;
+import cn.qinghe.mall.framework.mybatis.core.util.MybatisUtils;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import java.util.List;
+
+/**
+ * @Author：qw
+ * @Package：cn.qinghe.mall.framework.mybatis.core.mapper
+ * @Project：qinghe-mall
+ * @name：BaseMapperX
+ * @Date：2026/10/21 15:20
+ * @Filename：BaseMapperX
+ */
+public interface BaseMapperX<T> extends BaseMapper<T> {
+    default PageResult<T> selectPage(PageParam param, Wrapper<T> wrapper){
+        if(PageParam.PAGE_SIZE_NONE.equals(param.getPageSize())){
+            List<T> list=selectList(wrapper);
+            return new PageResult<T>((long) list.size(),list );
+        }
+
+        Page<T> objectPage = MybatisUtils.buildPage(param);
+        selectPage(objectPage,wrapper);
+        return new PageResult<>(objectPage.getTotal(),objectPage.getRecords());
+    }
+}

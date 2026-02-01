@@ -1,0 +1,36 @@
+server:
+  address: 127.0.0.1
+  port: 8080
+
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: ${NACOS_NAMESPACE}
+        group: QINGHE_MALL
+        ip: 127.0.0.1
+      config:
+        server-addr: 127.0.0.1:8848
+        namespace: ${NACOS_NAMESPACE}
+        group: QINGHE_MALL
+
+  config:
+    import:
+      - "nacos:qinghe-system-local.yaml?group=QINGHE_MALL&refreshEnabled=true"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,loggers
+
+  endpoint:
+    health:
+      show-details: always
+
