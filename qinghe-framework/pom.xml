@@ -13,6 +13,7 @@
         <module>qinghe-spring-boot-starter-web</module>
         <module>qinghe-spring-boot-starter-mybatis</module>
         <module>qinghe-spring-boot-starter-biz-tenant</module>
+        <module>qinghe-spring-boot-starter-security</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 

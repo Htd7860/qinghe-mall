@@ -1,1 +1,2 @@
 cn.qinghe.mall.framework.tenant.config.QingheTenantAutoConfiguration
+cn.qinghe.mall.framework.tenant.config.QingheTenantWebAutoConfiguration
