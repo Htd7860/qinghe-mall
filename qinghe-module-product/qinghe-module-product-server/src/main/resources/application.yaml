@@ -1,0 +1,98 @@
+server:
+  address: ${PRODUCT_BIND_ADDRESS:127.0.0.1}
+  port: ${PRODUCT_PORT:8082}
+  forward-headers-strategy: none
+
+# Explicit opt-in; adding handlers does not start XXL or register schedules remotely.
+xxl:
+  job:
+    enabled: ${PRODUCT_JOB_ENABLED:false}
+    access-token: ${XXL_JOB_ACCESS_TOKEN:}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:}
+    executor:
+      app-name: qinghe-product
+      ip: ${PRODUCT_JOB_IP:127.0.0.1}
+      port: ${PRODUCT_JOB_PORT:18082}
+      log-path: ${PRODUCT_JOB_LOG_PATH:./logs/xxl-job}
+      log-retention-days: 30
+
+spring:
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+  application:
+    name: qinghe-product
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${QINGHE_PRODUCT_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_product?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+qinghe:
+  order-service-auth:
+    trade-token: ${TRADE_PRODUCT_SERVICE_TOKEN:}
+  info:
+    base-package: cn.qinghe.mall.module.product
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+  product:
+    search:
+      enabled: false
+      endpoint: ${PRODUCT_ES_ENDPOINT:http://127.0.0.1:9200}
+      index: ${PRODUCT_ES_INDEX:qinghe-product-v1}
+      api-key: ${PRODUCT_ES_API_KEY:}
+    storefront:
+      service-token: ${PRODUCT_SYSTEM_STOREFRONT_TOKEN:}
+    seckill-stock:
+      service-token: ${PROMOTION_PRODUCT_SECKILL_TOKEN:}
+    trade-base-url: ${TRADE_BASE_URL:http://127.0.0.1:8083}
+    export:
+      max-rows: ${PRODUCT_EXPORT_MAX_ROWS:5000}
+      max-file-bytes: ${PRODUCT_EXPORT_MAX_FILE_BYTES:8388608}
+      max-concurrent: ${PRODUCT_EXPORT_MAX_CONCURRENT:2}
+    max-skus: ${PRODUCT_MAX_SKUS:200}
+    alert-stock: ${PRODUCT_ALERT_STOCK:10}
+    infra-base-url: ${INFRA_BASE_URL:http://127.0.0.1:8081}
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

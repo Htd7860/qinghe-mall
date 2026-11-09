@@ -1,0 +1,1 @@
+node-qrcode 1.5.4 (MIT), authors Ryan Day and contributors. Used through the pinned npm dependency for local original-payment QR PNG rendering. Original license retained alongside. No source modification or online encoding service. Type declarations @types/qrcode 1.5.6 retain their package MIT license.

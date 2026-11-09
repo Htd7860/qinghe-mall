@@ -1,0 +1,689 @@
+server:
+  address: ${GATEWAY_BIND_ADDRESS:127.0.0.1}
+  port: ${GATEWAY_PORT:8088}
+  # 保留真实连接对端；部署反向代理时另行配置可信代理，不能直接信任外来转发头。
+  forward-headers-strategy: none
+
+qinghe:
+  gateway:
+    system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+    infra-base-url: ${INFRA_BASE_URL:http://127.0.0.1:8081}
+    product-base-url: ${PRODUCT_BASE_URL:http://127.0.0.1:8082}
+    trade-base-url: ${TRADE_BASE_URL:http://127.0.0.1:8083}
+    member-base-url: ${MEMBER_BASE_URL:http://127.0.0.1:8084}
+    promotion-base-url: ${PROMOTION_BASE_URL:http://127.0.0.1:8085}
+    pay-base-url: ${PAY_BASE_URL:http://127.0.0.1:8086}
+    login-rate-limit:
+      max-requests: 60
+      window-seconds: 60
+      max-local-sources: 10000
+      redis-timeout-millis: 200
+      key-prefix: ${QINGHE_REDIS_KEY_PREFIX:qinghe:local}
+
+spring:
+  application:
+    name: qinghe-gateway
+  main:
+    web-application-type: reactive
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 1
+    connect-timeout: 1s
+    timeout: 1s
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      httpclient:
+        connect-timeout: 2000
+        response-timeout: 15s
+      routes:
+        - id: pay-alipay-order-notify
+          uri: ${qinghe.gateway.pay-base-url}
+          predicates:
+            - Path=/public-api/pay/notify/alipay/{channelId:[0-9]+}
+            - Method=POST
+        - id: product-public-catalog
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/app-api/product/spu/page,/app-api/product/spu/search-page,/app-api/product/spu/get-detail,/app-api/product/catalog/options
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: promotion-member-seckill-browse
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/app-api/promotion/seckill-activity/page,/app-api/promotion/seckill-activity/get
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-seckill-quote
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/seckill/quote
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: trade-seckill-quote-result
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/seckill/quote-result
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: promotion-seckill-admit
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/app-api/promotion/seckill/admit
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: promotion-seckill-receipt
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/app-api/promotion/seckill/request-result,/app-api/promotion/seckill/request-detail,/app-api/promotion/seckill/request-page
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: trade-merchant-aftersale-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/after-sale/page,/admin-api/trade/after-sale/get-detail,/admin-api/trade/after-sale/log-page,/admin-api/trade/after-sale/return-address,/admin-api/trade/after-sale/decision-result,/admin-api/trade/after-sale/area-options,/admin-api/trade/after-sale/refund-result,/admin-api/trade/after-sale/refund-prepare-result,/admin-api/trade/after-sale/refund-retry-result,/admin-api/trade/after-sale/refund-budget,/admin-api/trade/after-sale/refund-continue-result
+            - Method=GET
+        - id: trade-merchant-aftersale-write
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/after-sale/agree,/admin-api/trade/after-sale/disagree,/admin-api/trade/after-sale/receive,/admin-api/trade/after-sale/refund-prepare,/admin-api/trade/after-sale/refund-execute,/admin-api/trade/after-sale/refund-sync,/admin-api/trade/after-sale/refund-retry,/admin-api/trade/after-sale/refund-continue
+            - Method=POST
+        - id: trade-member-aftersale-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/after-sale/page,/app-api/trade/after-sale/get,/app-api/trade/after-sale/log-page,/app-api/trade/after-sale/return-address,/app-api/trade/after-sale/application-result,/app-api/trade/after-sale/decision-result,/app-api/trade/after-sale/express-options
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-member-aftersale-write
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/after-sale/create,/app-api/trade/after-sale/delivery,/app-api/trade/after-sale/cancel
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-merchant-order-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order/page,/admin-api/trade/order/summary,/admin-api/trade/order/get-detail,/admin-api/trade/order/get-delivery-detail,/admin-api/trade/order/log-page,/admin-api/trade/order/express-options
+            - Method=GET
+        - id: trade-merchant-order-write
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order/delivery,/admin-api/trade/order/update-logistics
+            - Method=POST
+        - id: trade-member-order-receive
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/order/receive
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-member-order-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/order/create-result,/app-api/trade/order/page,/app-api/trade/order/get-detail,/app-api/trade/order/payment-result
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-member-order-write
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/order/create,/app-api/trade/order/stop-create,/app-api/trade/order/prepare-payment,/app-api/trade/order/cancel,/app-api/trade/order/submit-payment,/app-api/trade/order/query-payment,/app-api/trade/order/recover-payment-qr
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 120000
+        - id: trade-member-settlement
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/order/settlement
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: trade-member-settlement-result
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/order/settlement-result
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-member-cart-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/cart/list,/app-api/trade/cart/get-count,/app-api/trade/cart/product-options
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: trade-member-cart-add
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/cart/add
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: trade-member-cart-update
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/cart/update-count,/app-api/trade/cart/update-selected,/app-api/trade/cart/reset
+            - Method=PUT
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: trade-member-cart-delete
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/app-api/trade/cart/delete
+            - Method=DELETE
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: promotion-member-coupon-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/app-api/promotion/coupon-template/page,/app-api/promotion/coupon/page,/app-api/promotion/coupon/get,/app-api/promotion/coupon/take-result
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: promotion-member-coupon-take
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/app-api/promotion/coupon/take
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+          metadata:
+            response-timeout: 30000
+        - id: promotion-platform-seckill-stop
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/platform-api/promotion/seckill-operation/stop
+            - Method=POST
+        - id: promotion-platform-seckill-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/platform-api/promotion/seckill-operation/page,/platform-api/promotion/seckill-operation/audit-page
+            - Method=GET
+        - id: promotion-seckill-runtime-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/runtime-result
+            - Method=GET
+        - id: promotion-seckill-runtime-write
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/prepare-runtime,/admin-api/promotion/seckill-activity/initialize-runtime,/admin-api/promotion/seckill-activity/ready-runtime,/admin-api/promotion/seckill-activity/stop-runtime
+            - Method=POST
+          metadata:
+            response-timeout: 30000
+        - id: promotion-seckill-publish-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/publish-result,/admin-api/promotion/seckill-activity/publish-history,/admin-api/promotion/seckill-activity/clearing-progress
+            - Method=GET
+        - id: promotion-seckill-publish-write
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/prepare-publish,/admin-api/promotion/seckill-activity/advance-publish-sku,/admin-api/promotion/seckill-activity/cancel-publish,/admin-api/promotion/seckill-activity/compensate-publish-sku,/admin-api/promotion/seckill-activity/confirm-publish,/admin-api/promotion/seckill-activity/withdraw-publish,/admin-api/promotion/seckill-activity/settle-publish,/admin-api/promotion/seckill-activity/reopen-draft
+            - Method=POST
+          metadata:
+            response-timeout: 60000
+        - id: promotion-seckill-activity-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/get,/admin-api/promotion/seckill-activity/page
+            - Method=GET
+        - id: promotion-seckill-activity-create
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/create
+            - Method=POST
+          metadata:
+            response-timeout: 30000
+        - id: promotion-seckill-activity-update
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/seckill-activity/update
+            - Method=PUT
+          metadata:
+            response-timeout: 30000
+        - id: promotion-coupon-template-read
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/coupon-template/get,/admin-api/promotion/coupon-template/page
+            - Method=GET
+        - id: promotion-coupon-template-create
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/coupon-template/create
+            - Method=POST
+          metadata:
+            response-timeout: 30000
+        - id: promotion-coupon-template-update
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/coupon-template/update,/admin-api/promotion/coupon-template/update-status
+            - Method=PUT
+          metadata:
+            response-timeout: 30000
+        - id: promotion-coupon-template-delete
+          uri: ${qinghe.gateway.promotion-base-url}
+          predicates:
+            - Path=/admin-api/promotion/coupon-template/delete
+            - Method=DELETE
+          metadata:
+            response-timeout: 30000
+        - id: member-auth-login
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/auth/login
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-auth-lifecycle
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/auth/refresh-token,/app-api/auth/logout
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-auth-account
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/auth/register,/app-api/auth/reset-password,/app-api/auth/send-code
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-address-read
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/member/address/get,/app-api/member/address/list,/app-api/member/address/get-default,/app-api/member/address/area-options,/app-api/member/user/get
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-address-create
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/member/address/create
+            - Method=POST
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-address-update-preference
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/member/address/update,/app-api/member/user/preferences
+            - Method=PUT
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-address-delete
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/member/address/delete
+            - Method=DELETE
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: member-auth-session
+          uri: ${qinghe.gateway.member-base-url}
+          predicates:
+            - Path=/app-api/auth/session
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: public-storefront-resolve
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/app-api/storefront/resolve
+            - Method=GET
+          filters:
+            - PreserveHostHeader
+            - RemoveRequestHeader=Forwarded
+            - RemoveRequestHeader=X-Forwarded-Host
+            - RemoveRequestHeader=X-Original-Host
+        - id: product-spu-export
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/export-excel
+            - Method=GET
+          metadata:
+            response-timeout: 30000
+        - id: product-spu-owner-option
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/owner-option
+            - Method=GET
+        - id: product-spu-transfer-owner
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/transfer-owner
+            - Method=PUT
+        - id: product-spu-editor-options
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/editor-options
+            - Method=GET
+        - id: product-spu-post
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/create,/admin-api/product/stock/adjust
+            - Method=POST
+        - id: product-spu-put
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/update,/admin-api/product/spu/update-status
+            - Method=PUT
+        - id: product-spu-delete
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/delete
+            - Method=DELETE
+        - id: product-spu-get
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/spu/get-detail,/admin-api/product/spu/page,/admin-api/product/spu/get-count,/admin-api/product/stock/operation
+            - Method=GET
+        - id: trade-order-recovery-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order-recovery/page,/admin-api/trade/order-recovery/get,/admin-api/trade/order-recovery/replay-result,/admin-api/trade/order-recovery/replay-history
+            - Method=GET
+        - id: trade-order-event-read
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order-event/page,/admin-api/trade/order-event/get,/admin-api/trade/order-event/replay-result,/admin-api/trade/order-event/replay-history
+            - Method=GET
+        - id: trade-order-event-replay
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order-event/replay
+            - Method=POST
+        - id: trade-order-recovery-replay
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/order-recovery/replay
+            - Method=POST
+        - id: trade-delivery-get
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/delivery/express-template/area-options,/admin-api/trade/delivery/express-template/get,/admin-api/trade/delivery/express-template/list,/admin-api/trade/delivery/express-template/list-all-simple,/admin-api/trade/delivery/express-template/page
+            - Method=GET
+        - id: trade-delivery-post
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/delivery/express-template/create
+            - Method=POST
+        - id: trade-delivery-put
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/delivery/express-template/update
+            - Method=PUT
+        - id: trade-delivery-delete
+          uri: ${qinghe.gateway.trade-base-url}
+          predicates:
+            - Path=/admin-api/trade/delivery/express-template/delete
+            - Method=DELETE
+        - id: product-catalog-get
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/brand/get,/admin-api/product/brand/list-all-simple,/admin-api/product/brand/page,/admin-api/product/brand/list,/admin-api/product/category/get,/admin-api/product/category/list,/admin-api/product/property/get,/admin-api/product/property/page,/admin-api/product/property/simple-list,/admin-api/product/property/value/get,/admin-api/product/property/value/page,/admin-api/product/property/value/simple-list
+            - Method=GET
+        - id: product-catalog-post
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/brand/create,/admin-api/product/category/create,/admin-api/product/property/create,/admin-api/product/property/value/create
+            - Method=POST
+        - id: product-catalog-put
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/brand/update,/admin-api/product/category/update,/admin-api/product/property/update,/admin-api/product/property/value/update
+            - Method=PUT
+        - id: product-catalog-delete
+          uri: ${qinghe.gateway.product-base-url}
+          predicates:
+            - Path=/admin-api/product/brand/delete,/admin-api/product/category/delete,/admin-api/product/property/delete,/admin-api/product/property/value/delete
+            - Method=DELETE
+        - id: infra-file-upload
+          uri: ${qinghe.gateway.infra-base-url}
+          predicates:
+            - Path=/admin-api/infra/file/upload,/platform-api/infra/file/upload
+            - Method=POST
+        - id: infra-file-read
+          uri: ${qinghe.gateway.infra-base-url}
+          predicates:
+            - Path=/admin-api/infra/file/page,/platform-api/infra/file/page,/admin-api/infra/file/get,/platform-api/infra/file/get,/admin-api/infra/file/content,/platform-api/infra/file/content
+            - Method=GET
+        - id: infra-file-delete
+          uri: ${qinghe.gateway.infra-base-url}
+          predicates:
+            - Path=/admin-api/infra/file/delete,/platform-api/infra/file/delete
+            - Method=DELETE
+        - id: infra-file-public-image
+          uri: ${qinghe.gateway.infra-base-url}
+          predicates:
+            - Path=/public-api/infra/file/{configId}/get/tenant/{tenantId}/{purpose}/{date}/{filename}
+            - Method=GET
+        - id: system-password-login
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/auth/login,/platform-api/auth/login
+            - Method=POST
+        - id: system-current-identity
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/auth/session,/platform-api/auth/session
+            - Method=GET
+        - id: system-token-lifecycle
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/auth/refresh-token,/platform-api/auth/refresh-token,/admin-api/auth/logout,/platform-api/auth/logout
+            - Method=POST
+        - id: system-role-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/role/page,/platform-api/system/role/page,/admin-api/system/role/get,/platform-api/system/role/get
+            - Method=GET
+        - id: system-role-menu-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/menu/simple-list,/platform-api/system/menu/simple-list,/admin-api/system/permission/list-role-menus,/platform-api/system/permission/list-role-menus
+            - Method=GET
+        - id: system-role-menu-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/permission/assign-role-menu,/platform-api/system/permission/assign-role-menu
+            - Method=POST
+        - id: system-role-lifecycle
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/role/create,/platform-api/system/role/create,/admin-api/system/role/update,/platform-api/system/role/update,/admin-api/system/role/update-status,/platform-api/system/role/update-status,/admin-api/system/role/delete,/platform-api/system/role/delete,/admin-api/system/role/restore,/platform-api/system/role/restore
+            - Method=POST
+        - id: system-user-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/user/page,/platform-api/system/user/page,/admin-api/system/user/get,/platform-api/system/user/get
+            - Method=GET
+        - id: system-user-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/user/create,/platform-api/system/user/create,/admin-api/system/user/update,/platform-api/system/user/update,/admin-api/system/user/update-status,/platform-api/system/user/update-status,/admin-api/system/user/update-password,/platform-api/system/user/update-password,/admin-api/system/user/delete,/platform-api/system/user/delete,/admin-api/system/user/restore,/platform-api/system/user/restore
+            - Method=POST
+        - id: system-dept-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/dept/list,/platform-api/system/dept/list
+            - Method=GET
+        - id: system-dept-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/dept/create,/platform-api/system/dept/create,/admin-api/system/dept/update,/platform-api/system/dept/update,/admin-api/system/dept/update-status,/platform-api/system/dept/update-status,/admin-api/system/dept/delete,/platform-api/system/dept/delete,/admin-api/system/dept/restore,/platform-api/system/dept/restore
+            - Method=POST
+        - id: system-user-role-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/permission/list-user-roles,/platform-api/system/permission/list-user-roles
+            - Method=GET
+        - id: system-user-role-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/permission/assign-user-role,/platform-api/system/permission/assign-user-role,/admin-api/system/permission/assign-role-data-scope,/platform-api/system/permission/assign-role-data-scope
+            - Method=POST
+        - id: system-tenant-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/tenant/page,/platform-api/system/tenant/get
+            - Method=GET
+        - id: system-tenant-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/tenant/create,/platform-api/system/tenant/update,/platform-api/system/tenant/update-status,/platform-api/system/tenant/delete,/platform-api/system/tenant/restore
+            - Method=POST
+        - id: system-package-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/tenant-package/page,/platform-api/system/tenant-package/get,/platform-api/system/tenant-package/change-result,/platform-api/system/tenant-package/change-history
+            - Method=GET
+        - id: system-package-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/tenant-package/create,/platform-api/system/tenant-package/update,/platform-api/system/tenant-package/preview-change,/platform-api/system/tenant-package/update-status,/platform-api/system/tenant-package/delete,/platform-api/system/tenant-package/restore
+            - Method=POST
+        - id: system-menu-management-read
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/menu/list
+            - Method=GET
+        - id: system-menu-management-write
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/menu/create,/platform-api/system/menu/update,/platform-api/system/menu/update-status,/platform-api/system/menu/delete,/platform-api/system/menu/restore
+            - Method=POST
+        - id: system-user-navigation
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/menu/navigation,/platform-api/system/menu/navigation
+            - Method=GET
+
+        - id: system-package-menu-options
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/platform-api/system/tenant-package/menu-options
+            - Method=GET
+        - id: system-management-options
+          uri: ${qinghe.gateway.system-base-url}
+          predicates:
+            - Path=/admin-api/system/role/simple-list,/platform-api/system/role/simple-list,/admin-api/system/dept/simple-list,/platform-api/system/dept/simple-list,/platform-api/system/tenant-package/simple-list
+            - Method=GET
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

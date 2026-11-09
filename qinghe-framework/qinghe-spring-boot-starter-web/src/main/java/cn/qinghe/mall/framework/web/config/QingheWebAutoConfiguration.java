@@ -1,6 +1,10 @@
 package cn.qinghe.mall.framework.web.config;
 
 import cn.qinghe.mall.framework.core.handler.GlobalExceptionHandler;
+import cn.qinghe.mall.framework.web.filter.TraceFilter;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.core.Ordered;
+import javax.servlet.DispatcherType;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -15,6 +19,18 @@ import org.springframework.web.servlet.DispatcherServlet;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(QingheWebExceptionProperties.class)
 public class QingheWebAutoConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean(name="traceFilterRegistration")
+    public FilterRegistrationBean<TraceFilter> traceFilterRegistration() {
+        FilterRegistrationBean<TraceFilter> registration=
+                new FilterRegistrationBean<>();
+        registration.setFilter(new TraceFilter());
+        registration.setName("traceFilter");registration.setOrder(Ordered.HIGHEST_PRECEDENCE+10);
+        registration.addUrlPatterns("/*");registration.setDispatcherTypes(DispatcherType.REQUEST);
+        return registration;
+    }
+
 
     @Bean
     @ConditionalOnMissingBean(GlobalExceptionHandler.class)

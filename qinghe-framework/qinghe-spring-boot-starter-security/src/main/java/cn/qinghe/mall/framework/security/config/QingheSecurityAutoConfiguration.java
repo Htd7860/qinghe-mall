@@ -1,9 +1,13 @@
 package cn.qinghe.mall.framework.security.config;
 
 import cn.qinghe.mall.framework.common.biz.system.oauth2.OAuth2TokenCommonApi;
+import cn.qinghe.mall.framework.common.biz.system.permission.PermissionCommonApi;
 import cn.qinghe.mall.framework.security.core.filter.TokenAuthenticationFilter;
 import cn.qinghe.mall.framework.security.core.handler.AccessDeniedHandlerImpl;
 import cn.qinghe.mall.framework.security.core.handler.AuthenticationEntryPointImpl;
+import cn.qinghe.mall.framework.security.core.handler.SecurityExceptionHandler;
+import cn.qinghe.mall.framework.security.core.service.SecurityFrameworkService;
+import cn.qinghe.mall.framework.security.core.service.SecurityFrameworkServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -35,6 +39,19 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 )
 @EnableConfigurationProperties(SecurityProperties.class)
 public class QingheSecurityAutoConfiguration {
+    /** 与yudao同名，供@PreAuthorize("@ss.hasPermission('资源码')")引用。 */
+    @Bean("ss")
+    @ConditionalOnMissingBean(SecurityFrameworkService.class)
+    public SecurityFrameworkService securityFrameworkService(PermissionCommonApi permissionApi) {
+        return new SecurityFrameworkServiceImpl(permissionApi);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(SecurityExceptionHandler.class)
+    public SecurityExceptionHandler securityExceptionHandler() {
+        return new SecurityExceptionHandler();
+    }
+
     @Bean
     @ConditionalOnMissingBean(AuthenticationEntryPoint.class)
     public AuthenticationEntryPoint authenticationEntryPoint(ObjectMapper objectMapper){

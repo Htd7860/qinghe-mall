@@ -1,2 +1,3 @@
+cn.qinghe.mall.framework.security.config.QingheRemoteSecurityAutoConfiguration
 cn.qinghe.mall.framework.security.config.QingheSecurityAutoConfiguration
 cn.qinghe.mall.framework.security.config.QingheSecurityFilterChainConfiguration

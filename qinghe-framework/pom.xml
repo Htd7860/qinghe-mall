@@ -10,10 +10,13 @@
     <packaging>pom</packaging>
     <modules>
         <module>qinghe-common</module>
+        <module>qinghe-spring-boot-starter-excel</module>
+        <module>qinghe-spring-boot-starter-job</module>
         <module>qinghe-spring-boot-starter-web</module>
         <module>qinghe-spring-boot-starter-mybatis</module>
         <module>qinghe-spring-boot-starter-biz-tenant</module>
         <module>qinghe-spring-boot-starter-security</module>
+        <module>qinghe-spring-boot-starter-redis</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 

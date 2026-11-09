@@ -1,3 +1,6 @@
+server:
+  forward-headers-strategy: none
+
 spring:
   application:
     name: qinghe-system
@@ -9,5 +12,19 @@ management:
         include: health
 
 qinghe:
+  member-token-issue:
+    member-token: ${QINGHE_MEMBER_SYSTEM_TOKEN:}
+    promotion-storefront-token: ${PROMOTION_SYSTEM_STOREFRONT_TOKEN:}
+    product-storefront-token: ${PRODUCT_SYSTEM_STOREFRONT_TOKEN:}
+    max-concurrent: ${MEMBER_TOKEN_ISSUE_MAX_CONCURRENT:16}
+  member-auth:
+    member-base-url: ${MEMBER_BASE_URL:http://127.0.0.1:8084}
+    system-token: ${QINGHE_SYSTEM_MEMBER_TOKEN:}
+    max-concurrent-calls: ${MEMBER_AUTH_MAX_CONCURRENT:32}
   info:
     base-package: cn.qinghe.mall
+  auth:
+    login-failure:
+      max-failures: 5
+      window-seconds: 900
+      max-local-subjects: 10000

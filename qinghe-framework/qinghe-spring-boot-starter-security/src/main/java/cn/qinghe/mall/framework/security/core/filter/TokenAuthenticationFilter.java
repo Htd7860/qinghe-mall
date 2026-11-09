@@ -6,6 +6,7 @@ import cn.qinghe.mall.framework.common.enums.UserTypeEnum;
 import cn.qinghe.mall.framework.common.exception.ServiceException;
 import cn.qinghe.mall.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.qinghe.mall.framework.common.pojo.CommonResult;
+import cn.qinghe.mall.framework.common.util.ServiceExceptionUtil;
 import cn.qinghe.mall.framework.security.config.SecurityProperties;
 import cn.qinghe.mall.framework.security.core.LoginUser;
 import cn.qinghe.mall.framework.security.core.util.SecurityFrameworkUtils;
@@ -64,7 +65,18 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (AuthenticationServiceException e) {
             SecurityContextHolder.clearContext();
-            log.error("Token verification service unavailable");
+            Throwable cause = e.getCause() == null ? e : e.getCause();
+            String location = "unknown";
+            for (StackTraceElement frame : cause.getStackTrace()) {
+                if (frame.getClassName().startsWith("cn.qinghe.mall.")
+                        && !ServiceExceptionUtil.class.getName().equals(frame.getClassName())) {
+                    location = frame.getClassName() + "." + frame.getMethodName() + ":" + frame.getLineNumber();
+                    break;
+                }
+            }
+            // Exception messages / full stacks may contain SQL parameters or raw credentials.
+            log.error("Token verification service unavailable, cause={}, location={}",
+                    cause.getClass().getSimpleName(), location);
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.setContentType("application/json");

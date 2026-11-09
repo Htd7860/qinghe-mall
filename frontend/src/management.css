@@ -1,0 +1,188 @@
+.management-tabs {
+  display: flex;
+  gap: 24px;
+  overflow: auto;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.management-tabs a {
+  white-space: nowrap;
+  padding: 12px 0;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+.management-tabs a[aria-current="page"] {
+  color: var(--primary);
+  border-color: var(--primary);
+  font-weight: 600;
+}
+.management-filter {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  min-width: 140px;
+}
+.management-filter input {
+  min-width: 180px;
+}
+.management-alert,
+.management-notice,
+.management-result {
+  padding: 14px 18px;
+  margin: 12px 0;
+  background: var(--primary-light, #eaf3ee);
+  border-radius: 6px;
+  line-height: 1.7;
+}
+.management-alert {
+  color: var(--danger, #ba4242);
+  background: #fff2ef;
+}
+.management-alert button {
+  margin-left: 12px;
+}
+.management-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.management-result span {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.management-table-scroll {
+  overflow: auto;
+}
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.management-table th {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface-soft, #f4f6f5);
+}
+.management-table th,
+.management-table td {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.management-table small,
+.management-checklist small,
+.management-history small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.management-row-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  min-width: 180px;
+}
+.management-danger {
+  color: #ba4242;
+}
+.management-state {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: #eef1ef;
+  color: var(--muted);
+}
+.management-state.enabled {
+  background: #eaf3ee;
+  color: #26704d;
+}
+.management-state.deleted {
+  background: #fff2ef;
+  color: #ba4242;
+}
+.management-empty {
+  padding: 48px;
+  text-align: center;
+  color: var(--muted);
+}
+.management-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.management-section-title {
+  font-size: 15px;
+  margin: 24px 0 12px;
+}
+.management-checklist {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin: 14px 0;
+}
+.management-checklist label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.management-checklist input,
+.management-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+.management-fieldset .management-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.management-impact {
+  padding: 16px;
+  border-left: 3px solid var(--primary);
+  background: #eaf3ee;
+  margin: 16px 0;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.management-impact ul,
+.management-history ul {
+  max-height: 180px;
+  overflow: auto;
+  padding-left: 20px;
+}
+.management-history {
+  margin-top: 20px;
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  .management-tabs {
+    gap: 18px;
+  }
+  .management-table th,
+  .management-table td {
+    padding: 12px 16px;
+  }
+  .management-filter {
+    width: 100%;
+  }
+  .management-result .button {
+    width: 100%;
+  }
+  .management-fieldset .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

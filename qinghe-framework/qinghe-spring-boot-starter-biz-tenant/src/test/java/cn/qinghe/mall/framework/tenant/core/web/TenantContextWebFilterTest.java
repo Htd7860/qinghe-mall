@@ -48,7 +48,7 @@ class TenantContextWebFilterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"101", " 101 ", "00101", "9223372036854775807"})
+    @ValueSource(strings = {"0", "101", " 101 ", "00101", "9223372036854775807"})
     void validHeaderShouldBeVisibleOnlyDuringRequest(String header) throws Exception {
         AtomicBoolean called = new AtomicBoolean();
         filter.doFilter(request(header), new MockHttpServletResponse(), (req, res) -> {
@@ -76,7 +76,7 @@ class TenantContextWebFilterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"abc", "1.5", "0", "-1", "9223372036854775808", "+1", "101,202", "1e2"})
+    @ValueSource(strings = {"abc", "1.5", "-1", "9223372036854775808", "+1", "101,202", "1e2"})
     void invalidHeaderShouldReturnSafeJson400WithoutCallingDownstream(String header) throws Exception {
         TenantContextHolder.setTenantId(999L);
         TenantContextHolder.setIgnore(true);

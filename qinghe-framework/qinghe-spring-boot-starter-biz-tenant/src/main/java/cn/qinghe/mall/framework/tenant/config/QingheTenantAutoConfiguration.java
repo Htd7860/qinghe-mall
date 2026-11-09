@@ -2,6 +2,7 @@ package cn.qinghe.mall.framework.tenant.config;
 
 import cn.qinghe.mall.framework.mybatis.config.QingheMybatisAutoConfiguration;
 import cn.qinghe.mall.framework.mybatis.core.util.MybatisUtils;
+import cn.qinghe.mall.framework.tenant.core.aop.TenantIgnoreAspect;
 import cn.qinghe.mall.framework.tenant.core.db.TenantDatabaseInterceptor;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -9,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.handler.TenantLineHandler;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -25,8 +28,14 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(prefix = "qinghe.tenant",name = "enable",havingValue = "true",matchIfMissing = true)
 public class QingheTenantAutoConfiguration {
     @Bean
+    @ConditionalOnMissingBean(TenantIgnoreAspect.class)
+    public TenantIgnoreAspect tenantIgnoreAspect(BeanFactory beanFactory) {
+        return new TenantIgnoreAspect(beanFactory);
+    }
+
+    @Bean
     public TenantLineInnerInterceptor tenantLineInnerInterceptor(TenantProperties properties, MybatisPlusInterceptor interceptor){
-        TenantLineInnerInterceptor tenantLineInnerInterceptor=new TenantLineInnerInterceptor(new TenantDatabaseInterceptor(properties));
+        TenantLineInnerInterceptor tenantLineInnerInterceptor=new cn.qinghe.mall.framework.tenant.core.db.MySqlTenantLineInnerInterceptor(new TenantDatabaseInterceptor(properties));
         MybatisUtils.addInterceptor(interceptor,tenantLineInnerInterceptor,0);
         return tenantLineInnerInterceptor;
     }

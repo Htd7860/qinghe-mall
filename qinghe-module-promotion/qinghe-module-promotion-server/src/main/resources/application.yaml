@@ -1,0 +1,114 @@
+server:
+  address: ${PROMOTION_BIND_ADDRESS:127.0.0.1}
+  port: ${PROMOTION_PORT:8085}
+  forward-headers-strategy: none
+
+# Explicit opt-in; this slice neither starts an executor nor registers remote schedules.
+xxl:
+  job:
+    enabled: ${PROMOTION_JOB_ENABLED:false}
+    access-token: ${XXL_JOB_ACCESS_TOKEN:}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:}
+    executor:
+      app-name: qinghe-promotion
+      ip: ${PROMOTION_JOB_IP:127.0.0.1}
+      port: ${PROMOTION_JOB_PORT:18085}
+      log-path: ${PROMOTION_JOB_LOG_PATH:./logs/xxl-job}
+      log-retention-days: 30
+
+spring:
+  autoconfigure:
+    # All MQ clients are owned by explicit feature configurations, as in trade.
+    exclude: org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+  application:
+    name: qinghe-promotion
+  redis:
+    host: ${QINGHE_REDIS_HOST:127.0.0.1}
+    port: ${QINGHE_REDIS_PORT:6379}
+    database: ${QINGHE_PROMOTION_REDIS_DATABASE:1}
+    password: ${QINGHE_REDIS_PASSWORD:}
+    connect-timeout: 3s
+    timeout: 3s
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${QINGHE_PROMOTION_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_promotion?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+qinghe:
+  redis:
+    key-prefix: ${QINGHE_PROMOTION_REDIS_PREFIX:qinghe:local:promotion}
+  order-service-auth:
+    trade-token: ${TRADE_PROMOTION_SERVICE_TOKEN:}
+  promotion:
+    storefront:
+      service-token: ${PROMOTION_SYSTEM_STOREFRONT_TOKEN:}
+    # Keep off until payment/cancel lifecycle, business recovery and authorized validation are complete.
+    seckill-results:
+      enabled: false
+      name-server: ${ROCKETMQ_NAME_SERVER:}
+      topic: ${SECKILL_RESULTS_TOPIC:qinghe-seckill-results}
+      consumer-group: ${SECKILL_RESULTS_CONSUMER_GROUP:qinghe-seckill-result-v1}
+    seckill-events:
+      enabled: ${SECKILL_EVENTS_ENABLED:false}
+      name-server: ${ROCKETMQ_NAME_SERVER:}
+      topic: ${SECKILL_COMMANDS_TOPIC:qinghe-seckill-commands}
+      producer-group: ${SECKILL_COMMANDS_PRODUCER_GROUP:qinghe-seckill-outbox}
+    seckill-admission:
+      max-members: ${SECKILL_MAX_MEMBERS:10000}
+      max-requests: ${SECKILL_MAX_REQUESTS:30000}
+      max-pending-events: ${SECKILL_MAX_PENDING_EVENTS:1000}
+    trade-base-url: ${TRADE_BASE_URL:http://127.0.0.1:8083}
+    seckill-binding:
+      service-token: ${PROMOTION_TRADE_SECKILL_TOKEN:}
+    seckill-stock:
+      service-token: ${PROMOTION_PRODUCT_SECKILL_TOKEN:}
+    product-base-url: ${PRODUCT_BASE_URL:http://127.0.0.1:8082}
+  info:
+    base-package: cn.qinghe.mall.module.promotion
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

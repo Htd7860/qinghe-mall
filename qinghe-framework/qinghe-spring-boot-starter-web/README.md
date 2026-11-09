@@ -64,7 +64,7 @@ qinghe:
       ignored-business-error-codes: []
 ```
 
-不在日志中附加完整请求正文、查询串或校验拒绝值；系统异常堆栈仅留服务端。业务代码自身不能把密码/Token等秘密放进异常文本；约束消息也不应插入秘密字段的validatedValue。日志中的traceId读取服务端MDC，当前starter不自行生成trace或信任请求头，也不补造tenantId/actorId。
+不在日志中附加完整请求正文、查询串或校验拒绝值；系统异常堆栈仅留服务端。业务代码自身不能把密码/Token等秘密放进异常文本；约束消息也不应插入秘密字段的validatedValue。日志中的traceId读取MDC；2026-10-30新增TraceFilter：唯一格式合法trace-id仅作为不可信日志关联线索，否则生成UUID，REQUEST结束清理，不补造tenantId/actorId。Gateway入口始终生成自己的编号；详见mall-saas/docs/design/REQUEST-TRACE.md。
 
 本模块覆盖Spring MVC异常。容器错误页、Filter/Spring Security链、Gateway、真实trace/租户上下文、infra错误日志持久化尚待对应工程接入；没有空的日志RPC或假成功。当前不等于整个项目生产验收通过。
 

@@ -1,0 +1,95 @@
+server:
+  address: ${MEMBER_BIND_ADDRESS:127.0.0.1}
+  port: ${MEMBER_PORT:8084}
+  forward-headers-strategy: none
+
+spring:
+  application:
+    name: qinghe-member
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${QINGHE_MEMBER_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_member?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:1}
+    username: ${QINGHE_REDIS_USERNAME:}
+    password: ${QINGHE_REDIS_PASSWORD:}
+    connect-timeout: 1s
+    timeout: 1s
+
+qinghe:
+  redis:
+    key-prefix: ${QINGHE_REDIS_KEY_PREFIX:qinghe:local}
+  member-token:
+    system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+    service-token: ${QINGHE_MEMBER_SYSTEM_TOKEN:}
+    max-concurrent-calls: ${MEMBER_TOKEN_MAX_CONCURRENT:16}
+  info:
+    base-package: cn.qinghe.mall.module.member
+  member:
+    login-failure:
+      max-failures: ${MEMBER_LOGIN_MAX_FAILURES:5}
+      window-seconds: ${MEMBER_LOGIN_FAILURE_WINDOW:900}
+      max-local-subjects: ${MEMBER_LOGIN_MAX_LOCAL_SUBJECTS:10000}
+    sms-code:
+      send-frequency-seconds: ${MEMBER_SMS_FREQUENCY_SECONDS:60}
+      daily-maximum: ${MEMBER_SMS_DAILY_MAXIMUM:10}
+      expire-seconds: ${MEMBER_SMS_EXPIRE_SECONDS:300}
+      max-attempts: ${MEMBER_SMS_MAX_ATTEMPTS:5}
+      max-concurrent: ${MEMBER_SMS_MAX_CONCURRENT:16}
+    sms:
+      mode: ${MEMBER_SMS_MODE:DISABLED}
+      api-key: ${MEMBER_SMS_API_KEY:}
+      api-secret: ${MEMBER_SMS_API_SECRET:}
+      signature: ${MEMBER_SMS_SIGNATURE:}
+      register-template: ${MEMBER_SMS_REGISTER_TEMPLATE:}
+      reset-password-template: ${MEMBER_SMS_RESET_TEMPLATE:}
+    service-auth:
+      system-token: ${QINGHE_SYSTEM_MEMBER_TOKEN:}
+    address:
+      max-addresses: ${MEMBER_MAX_ADDRESSES:20}
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

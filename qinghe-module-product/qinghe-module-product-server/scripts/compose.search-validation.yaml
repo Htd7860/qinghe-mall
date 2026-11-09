@@ -1,0 +1,32 @@
+# Dedicated local verification only. Never attach production volumes or publish transport port.
+# Provision with an explicit unique Compose project name; inspect labels before reusing any volume.
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.15
+    environment:
+      discovery.type: single-node
+      cluster.name: qinghe-search-verification
+      node.name: search-verification-01
+      xpack.security.enabled: "false"
+      xpack.ml.enabled: "false"
+      ingest.geoip.downloader.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:19200:9200"
+    mem_limit: 1536m
+    cpus: 2.0
+    restart: "no"
+    volumes:
+      - search-verification-data:/usr/share/elasticsearch/data
+    labels:
+      cn.qinghe.purpose: search-verification
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail --silent 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=2s' >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+volumes:
+  search-verification-data:
+    labels:
+      cn.qinghe.purpose: search-verification

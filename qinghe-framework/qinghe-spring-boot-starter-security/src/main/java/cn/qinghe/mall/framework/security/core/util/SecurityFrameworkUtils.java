@@ -3,6 +3,7 @@ package cn.qinghe.mall.framework.security.core.util;
 import cn.hutool.core.map.MapUtil;
 import cn.qinghe.mall.framework.core.util.WebFrameworkUtils;
 import cn.qinghe.mall.framework.security.core.LoginUser;
+import cn.qinghe.mall.framework.common.enums.UserTypeEnum;
 import org.springframework.lang.Nullable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,6 +31,21 @@ public class SecurityFrameworkUtils {
     public static final String LOGIN_USER_HEADER = "login-user";
 
     private SecurityFrameworkUtils(){}
+
+    /** 供同时声明商家/平台路径的管理Controller核对当前端，context-path由Servlet剥离。 */
+    public static void requireBackendRealm(HttpServletRequest request) {
+        LoginUser user = getLoginUser();
+        if (user == null) {
+            throw cn.qinghe.mall.framework.common.util.ServiceExceptionUtil.exception0(401, "请先登录");
+        }
+        String path = request.getServletPath();
+        Long tenantId = user.getTenantId();
+        boolean realmMatches = tenantId != null && (path.startsWith("/admin-api/") && tenantId > 0
+                || path.startsWith("/platform-api/") && tenantId == 0);
+        if (!UserTypeEnum.ADMIN.getValue().equals(user.getUserType()) || !realmMatches) {
+            throw new org.springframework.security.access.AccessDeniedException("后台入口与身份不匹配");
+        }
+    }
 
     public static Authentication getAuthentication() {
         SecurityContext context = SecurityContextHolder.getContext();

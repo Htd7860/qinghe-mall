@@ -1,0 +1,21 @@
+{
+  "settings": { "number_of_shards": 1, "number_of_replicas": 0, "index.max_result_window": 10000 },
+  "mappings": {
+    "dynamic": "strict",
+    "_meta": { "schema": "qinghe-product-v1", "source": "mysql-product-projection", "tombstones": "persistent-visible-false" },
+    "_routing": { "required": true },
+    "properties": {
+      "tenantId": { "type": "long" }, "id": { "type": "long" }, "version": { "type": "long" },
+      "visible": { "type": "boolean" }, "payloadHash": { "type": "keyword" },
+      "name": { "type": "text", "analyzer": "cjk" },
+      "introduction": { "type": "text", "analyzer": "cjk" },
+      "keywords": { "type": "text", "analyzer": "cjk" },
+      "brandId": { "type": "long" }, "brandName": { "type": "text", "analyzer": "cjk" },
+      "categoryId": { "type": "long" }, "categoryIds": { "type": "long" },
+      "categoryName": { "type": "text", "analyzer": "cjk" },
+      "picUrl": { "type": "keyword", "index": false, "doc_values": false },
+      "price": { "type": "integer" }, "marketPrice": { "type": "integer" }, "stock": { "type": "integer" },
+      "salesCount": { "type": "integer" }, "sort": { "type": "integer" }, "createdAt": { "type": "long" }
+    }
+  }
+}

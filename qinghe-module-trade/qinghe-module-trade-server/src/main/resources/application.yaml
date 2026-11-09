@@ -1,0 +1,120 @@
+server:
+  address: ${TRADE_BIND_ADDRESS:127.0.0.1}
+  port: ${TRADE_PORT:8083}
+  forward-headers-strategy: none
+
+# Explicit opt-in only; this slice does not configure/start an executor or job-admin.
+xxl:
+  job:
+    enabled: ${TRADE_JOB_ENABLED:false}
+    access-token: ${XXL_JOB_ACCESS_TOKEN:}
+    admin:
+      addresses: ${XXL_JOB_ADMIN_ADDRESSES:}
+    executor:
+      app-name: qinghe-trade
+      ip: ${TRADE_JOB_IP:127.0.0.1}
+      port: ${TRADE_JOB_PORT:18083}
+      log-path: ${TRADE_JOB_LOG_PATH:./logs/xxl-job}
+      log-retention-days: 30
+
+spring:
+  autoconfigure:
+    # Producer lifecycle is owned by the explicit events opt-in configuration below.
+    exclude: org.apache.rocketmq.spring.autoconfigure.RocketMQAutoConfiguration
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+  application:
+    name: qinghe-trade
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${QINGHE_TRADE_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_trade?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+qinghe:
+  info:
+    base-package: cn.qinghe.mall.module.trade
+  trade:
+    seckill-binding:
+      service-token: ${PROMOTION_TRADE_SECKILL_TOKEN:}
+    seckill-quote:
+      key: ${SECKILL_QUOTE_AES_KEY:}
+      key-id: ${SECKILL_QUOTE_KEY_ID:v1}
+    events:
+      enabled: ${TRADE_EVENTS_ENABLED:false}
+      name-server: ${ROCKETMQ_NAME_SERVER:}
+      topic: ${TRADE_EVENTS_TOPIC:qinghe-trade-events}
+      expiry-topic: ${TRADE_EXPIRY_TOPIC:qinghe-trade-expiry}
+      producer-group: ${TRADE_EVENTS_PRODUCER_GROUP:qinghe-trade-outbox}
+      consumer-group: ${TRADE_EVENTS_CONSUMER_GROUP:qinghe-trade-recovery-v1}
+    # Keep off until seckill recovery jobs and payment/cancel lifecycle are complete.
+    seckill-orders:
+      enabled: false
+      name-server: ${ROCKETMQ_NAME_SERVER:}
+      topic: ${SECKILL_COMMANDS_TOPIC:qinghe-seckill-commands}
+      consumer-group: ${SECKILL_COMMANDS_CONSUMER_GROUP:qinghe-seckill-create-v1}
+    seckill-results:
+      enabled: ${SECKILL_RESULTS_ENABLED:false}
+      name-server: ${ROCKETMQ_NAME_SERVER:}
+      topic: ${SECKILL_RESULTS_TOPIC:qinghe-seckill-results}
+      producer-group: ${SECKILL_RESULTS_PRODUCER_GROUP:qinghe-seckill-result-outbox}
+    order-resources:
+      product-token: ${TRADE_PRODUCT_SERVICE_TOKEN:}
+      promotion-token: ${TRADE_PROMOTION_SERVICE_TOKEN:}
+      pay-token: ${TRADE_PAY_SERVICE_TOKEN:}
+    member-base-url: ${MEMBER_BASE_URL:http://127.0.0.1:8084}
+    promotion-base-url: ${PROMOTION_BASE_URL:http://127.0.0.1:8085}
+    pay-base-url: ${PAY_BASE_URL:http://127.0.0.1:8086}
+    product-base-url: ${PRODUCT_BASE_URL:http://127.0.0.1:8082}
+    checkout:
+      max-cart-lines: ${CART_MAX_LINES:100}
+      max-order-lines: ${CHECKOUT_MAX_LINES:50}
+      max-item-quantity: ${CART_MAX_ITEM_QUANTITY:999}
+      quote-ttl-seconds: ${CHECKOUT_QUOTE_TTL_SECONDS:300}
+      max-active-quotes-per-member: ${CHECKOUT_MAX_ACTIVE_QUOTES:10}
+    delivery:
+      max-quote-lines: ${DELIVERY_MAX_QUOTE_LINES:200}
+      max-item-quantity: ${DELIVERY_MAX_ITEM_QUANTITY:9999}
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

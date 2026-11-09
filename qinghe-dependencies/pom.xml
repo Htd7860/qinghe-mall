@@ -11,6 +11,19 @@
     <packaging>pom</packaging>
     <dependencyManagement>
         <dependencies>
+            <!-- Same RocketMQ Spring library as local yudao; trade opts in explicitly. -->
+            <dependency><groupId>org.apache.rocketmq</groupId><artifactId>rocketmq-spring-boot</artifactId><version>2.3.6</version></dependency>
+            <!-- Same XXL-JOB version as local yudao; executor is explicitly disabled by default. -->
+            <dependency><groupId>com.xuxueli</groupId><artifactId>xxl-job-core</artifactId><version>2.4.0</version></dependency>
+            <dependency><groupId>cn.qinghe.mall</groupId><artifactId>qinghe-spring-boot-starter-job</artifactId><version>1.0-SNAPSHOT</version></dependency>
+            <!-- Same pinned SDK as local yudao; no WeChat/transfer channel imported. -->
+            <dependency><groupId>com.alipay.sdk</groupId><artifactId>alipay-sdk-java</artifactId><version>4.40.1014.ALL</version></dependency>
+            <dependency><groupId>cn.qinghe.mall</groupId><artifactId>qinghe-module-pay-api</artifactId><version>1.0-SNAPSHOT</version></dependency>
+            <dependency><groupId>cn.qinghe.mall</groupId><artifactId>qinghe-module-promotion-api</artifactId><version>1.0-SNAPSHOT</version></dependency>
+            <dependency><groupId>cn.qinghe.mall</groupId><artifactId>qinghe-module-member-api</artifactId><version>1.0-SNAPSHOT</version></dependency>
+            <!-- 与本地yudao相同的FastExcel版本；本批仅移植写出能力。 -->
+            <dependency><groupId>cn.idev.excel</groupId><artifactId>fastexcel</artifactId><version>1.3.0</version></dependency>
+            <dependency><groupId>cn.qinghe.mall</groupId><artifactId>qinghe-spring-boot-starter-excel</artifactId><version>1.0-SNAPSHOT</version></dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -22,6 +35,12 @@
                 <groupId>cn.hutool</groupId>
                 <artifactId>hutool-all</artifactId>
                 <version>5.8.47</version>
+            </dependency>
+            <!-- 与本地 yudao 相同的 Java 8 兼容文件类型识别依赖。 -->
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId>
+                <version>2.9.3</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -46,6 +65,16 @@
             <dependency>
                 <groupId>cn.qinghe.mall</groupId>
                 <artifactId>qinghe-module-system-api</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.qinghe.mall</groupId>
+                <artifactId>qinghe-module-infra-api</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.qinghe.mall</groupId>
+                <artifactId>qinghe-module-product-api</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
             <dependency>
@@ -99,6 +128,30 @@
                 <groupId>cn.qinghe.mall</groupId>
                 <artifactId>qinghe-spring-boot-starter-security</artifactId>
                 <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.qinghe.mall</groupId>
+                <artifactId>qinghe-spring-boot-starter-redis</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-boot-starter</artifactId>
+                <version>4.7.0</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.redisson</groupId>
+                        <artifactId>redisson-spring-data-41</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-spring-data-27</artifactId>
+                <version>4.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.qinghe.mall</groupId><artifactId>qinghe-module-trade-api</artifactId><version>1.0-SNAPSHOT</version>
             </dependency>
         </dependencies>
 

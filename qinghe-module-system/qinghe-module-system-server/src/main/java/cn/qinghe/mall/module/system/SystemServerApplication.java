@@ -11,6 +11,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @Date：2026/10/21 0:16
  * @Filename：SystemServerApplication
  */
+@org.springframework.boot.context.properties.EnableConfigurationProperties({
+        cn.qinghe.mall.module.system.framework.security.StorefrontProperties.class,
+        cn.qinghe.mall.module.system.framework.member.MemberQualificationProperties.class})
+@org.springframework.cloud.openfeign.EnableFeignClients(
+        clients=cn.qinghe.mall.module.member.api.auth.MemberQualificationApi.class,
+        defaultConfiguration=cn.qinghe.mall.module.system.framework.member.MemberQualificationFeignConfiguration.class)
 @SpringBootApplication
 public class SystemServerApplication {
     public static void main(String[] args) {

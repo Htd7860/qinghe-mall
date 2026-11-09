@@ -11,6 +11,13 @@
         <module>qinghe-dependencies</module>
         <module>qinghe-framework</module>
         <module>qinghe-module-system</module>
+        <module>qinghe-module-infra</module>
+        <module>qinghe-module-product</module>
+        <module>qinghe-module-trade</module>
+        <module>qinghe-module-member</module>
+        <module>qinghe-module-promotion</module>
+        <module>qinghe-module-pay</module>
+        <module>qinghe-gateway</module>
     </modules>
     <packaging>pom</packaging>
     <dependencyManagement>
@@ -33,6 +40,8 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- JAR plugin 2.4: regenerate the thin JAR before Boot repackage to include changed dependencies. -->
+        <jar.forceCreation>true</jar.forceCreation>
 
     </properties>
 

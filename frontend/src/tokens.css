@@ -1,0 +1,17 @@
+:root {
+  --primary: #17634c;
+  --primary-hover: #104c39;
+  --primary-soft: #eaf3ee;
+  --workspace: #f4f6f5;
+  --surface: #fff;
+  --text: #182b25;
+  --muted: #6a7872;
+  --border: #e4e9e6;
+  --danger: #ba4242;
+  --warning: #9b6a1f;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --font-body: Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-display: Georgia, "Songti SC", SimSun, serif;
+  color-scheme: light;
+}

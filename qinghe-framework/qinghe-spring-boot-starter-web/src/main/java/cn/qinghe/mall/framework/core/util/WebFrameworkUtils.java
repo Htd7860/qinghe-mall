@@ -37,7 +37,8 @@ public class WebFrameworkUtils {
             throw new NumberFormatException("租户编号格式不正确");
         }
 
-        if(tenantId<=0){
+        // 0是平台身份的合法归属；这里只解析编号，身份和端隔离由安全链校验。
+        if(tenantId<0){
             throw new IllegalArgumentException("租户编号格式不正确");
         }
 

@@ -1,0 +1,27 @@
+package cn.qinghe.mall.module.trade.controller.app.cart.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotNull;
+
+@Schema(description = "用户 App - 购物车更新数量 Request VO")
+@Data
+@EqualsAndHashCode(callSuper=true)
+public class AppCartUpdateCountReqVO extends AppCartWriteReqVO {
+
+    @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    @NotNull(message = "编号不能为空")
+    @Min(1) @Max(9007199254740991L)
+    private Long id;
+
+    @Schema(description = "商品数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @NotNull(message = "数量不能为空")
+    @Min(message = "数量必须大于 0", value = 1L)
+    @Max(9999)
+    private Integer count;
+
+}

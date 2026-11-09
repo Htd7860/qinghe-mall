@@ -9,6 +9,14 @@ spring:
     resources:
       add-mappings: false
 
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 1
+    connect-timeout: 3s
+    timeout: 3s
+
+
   cloud:
     nacos:
       discovery:
@@ -33,4 +41,14 @@ management:
   endpoint:
     health:
       show-details: always
+
+
+qinghe:
+  storefront:
+    allow-local-code-lookup: true
+    local-code-hosts:
+      - "127.0.0.1:5180"
+      - "localhost:5180"
+  redis:
+    key-prefix: qinghe:local
 

@@ -1,0 +1,69 @@
+server:
+  address: ${INFRA_BIND_ADDRESS:127.0.0.1}
+  port: ${INFRA_PORT:8081}
+  forward-headers-strategy: none
+
+spring:
+  application:
+    name: qinghe-infra
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  servlet:
+    multipart:
+      max-file-size: ${qinghe.file.upload.max-bytes}B
+      max-request-size: ${QINGHE_FILE_MAX_REQUEST_SIZE:11MB}
+  datasource:
+    url: ${QINGHE_INFRA_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_infra?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+qinghe:
+  info:
+    base-package: cn.qinghe.mall.module.infra
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+  file:
+    upload:
+      max-bytes: ${QINGHE_FILE_MAX_BYTES:10485760}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# security Feign独立配置已关闭自动重试、重定向与凭据日志。
+# 不开启全局Feign日志级别；不要把Authorization/请求体加入日志。

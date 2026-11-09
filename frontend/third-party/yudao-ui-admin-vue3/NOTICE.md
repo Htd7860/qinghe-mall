@@ -1,0 +1,40 @@
+# yudao-ui-admin-vue3 source reuse
+
+Local source: D:/aaa/a-yudao/yudao-ui-admin-vue3-master.
+Copyright (c) 2021-present Archer. Original MIT license is retained in LICENSE.
+
+2026-10-28: src/views/mall/product/spu/components/SkuList.vue build(Property[][]) recursion
+is extracted into src/api/product-editor.ts buildSkuCombinations. The recursion is retained;
+input bounds are checked before allocation. The original generateTableData flow informs the
+editor: combine selected values and preserve matching SKU rows. Current matching uses stable
+property:value IDs, not JSON display-name comparison. Existing project Vue components/style
+are used rather than copying ElementPlus, Pinia, editor or upload dependency chains.
+
+Source and target hashes are recorded in the current project evidence manifest.
+
+2026-10-29: MemberPaymentPanel selects Qrcode/src/Qrcode.vue initQrcode toDataURL rendering duty, using the same qrcode1.5.4 and types1.5.6. Original Archer/MIT retained. Existing project Shop/Modal/style reused; no ElementPlus, hooks, logos, download or online encoder. Assistant adaptations: fixed original-payment HTTP/identity/expiry, controlled known HTTPS content, render epoch and data-URL-only image, pending original-order metadata. No browser/sandbox acceptance; unknown precreate QR-loss recovery remains separate. Hashes: docs/evidence/yudao-member-payment-http-ui-port.json in the formal workspace.
+
+2026-10-30: MerchantAfterSales selects views/mall/trade/afterSale/detail/index.vue refund() confirmation -> AfterSaleApi.refund -> getDetail flow and api/mall/trade/afterSale/index.ts refund duty. Archer copyright and the original MIT license above are retained. Existing project components/HTTP/Bearer are reused. Assistant adaptations: separate prepare/execute/synchronize, server-calculated original refund plan, explicit funds/stock/coupon progress, actor-scoped original UUID/RF pending lookup without automatic POST replay or private reason/amount/credential persistence. Protected backend local GET can recover the original RF by case id. No ElementPlus or new financial console; no build/typecheck/runtime acceptance. Current source hashes: docs/evidence/yudao-refund-financial-ui-port.json in the formal workspace.
+
+2026-10-30: Original-number retry UI extends the previously selected detail.refund confirmation/API/reload duty. Archer/MIT retained. Assistant adaptation uses original UUID/version/reason audit, strict actor-scoped six-field pending metadata without reason/money/credentials, and read-only original actor receipt lookup without automatic retry. Source hashes and limits: docs/evidence/yudao-refund-retry-ui-port.json.
+
+2026-10-30: MerchantAfterSales manual one-opportunity authorization retains prior selected detail.refund confirmation/API/reload duty. Archer/MIT retained. Assistant adapts server budget display, explicit one-opportunity confirmation and original seven-field UUID pending recovery, with original reason reentry for explicit same-request forwarding. No automatic refund, reason/money/credential storage, new console or upstream dependency expansion. Source hashes/limits: docs/evidence/yudao-refund-continuation-ui-port.json.
+
+
+2026-10-30: Selected mall/statistics/trade/index.vue date-query/summary assignment and components/TradeStatisticValue.vue metric-display duties. Archer copyright/MIT retained. Adapted into existing merchant order page with local real summary API, strict integer-money strings/BigInt, no CountTo/ElementPlus or out-of-scope recharge/commission/export. Source/differences/runtime limits: mall-saas/docs/design/TRADE-OPERATING-SUMMARY-UI.md and matching port evidence.
+
+2026-10-30: MerchantSeckill selects api/mall/promotion/seckill/seckillActivity.ts page/get/create/update wrappers and views/mall/promotion/seckill/activity/index.vue / SeckillActivityForm.vue query, stable SKU configuration and save-feedback duties. Archer copyright and MIT above retained. Existing project components are reused instead of ElementPlus/FormCreate. Assistant adaptations: real merchant identity and exact permissions, integer-cent strings, original UUID/fromVersion read-only history recovery, explicit UTC offset, minimal actor-scoped unknown draft reminders. Draft create has no server idempotency key; manual acknowledgement is not a receipt. No publish command UI, new dependencies, build or runtime acceptance in this slice. Source hashes: docs/evidence/yudao-seckill-merchant-draft-ui-port.json.
+
+2026-10-31: SeckillPublishWorkflow selects seckill/activity/index.vue handleClose confirmation -> fixed API -> getList duties and api/mall/promotion/seckill/seckillActivity.ts close wrapper duty. Archer copyright/MIT above retained. Existing HTTP/components remain. Assistant adaptations: eight explicit lifecycle commands, immutable initial intent, actor-scoped six-field metadata, reason digest reentry, ordered version invalidation of unseen prepare, explicit same-intent stopping of unknown advance/confirm and mandatory all-SKU closure. No automatic POST or generalized retry framework; current source only, not built or runtime accepted. Hashes/limits: docs/evidence/yudao-seckill-publish-ui-port.json.
+
+2026-10-31: Merchant clearing progress extends the existing seckill activity detail/history. It follows src/views/mall/promotion/seckill/activity/index.vue getList loading/API/finally duties and the existing local API/session pattern. Generation-specific clearing content, sealed-balance projection, pending obligations and stale-response handling are project-specific, not an upstream full component. Original copyright/MIT attribution retained. See mall-saas/docs/design/SECKILL-CLEARING-PROGRESS-UI.md.
+
+2026-10-31: PlatformSeckill follows upstream seckill/activity/index.vue loading/API/finally and close confirmation duties. Platform original-generation stop receipts, original-command session recovery and audit projection are project-specific. Original MIT attribution retained; see mall-saas/docs/design/PLATFORM-SECKILL-UI.md.
+
+2026-10-31: Merchant runtime controls follow upstream seckill/activity/index.vue getList/handleClose loading and confirmation duties, and existing local publish recovery patterns. Fixed-window generation-stage commands and original-intent recovery are project-specific. Original MIT attribution retained; see mall-saas/docs/design/SECKILL-RUNTIME-UI.md.
+
+2026-10-31: MemberSeckillPanel and member-seckill API retain original MIT/Archer attribution and select api/mall/promotion/seckill/seckillActivity.ts getSeckillActivityPage/getSeckillActivity request-wrapper duties. The referenced upstream is an admin UI, not a full consumer purchase component. Existing local MemberCheckoutPanel, member addresses/session, Empty/Modal/styles and order detail are reused. Project adaptations: actor/store-scoped original quote/admission metadata, explicit money confirmation, read-before-retry recovery and accepted/order separation. No new dependencies, build or runtime acceptance. Hashes/limits: docs/evidence/yudao-seckill-member-ui-port.json.
+
+2026-10-31: Public sales browsing and own accepted-request history extend the existing MemberSeckillPanel and selected upstream seckill API request-wrapper duties; original MIT/Archer attribution retained. Trusted storefront resolution, separate purchase authentication, independent history state and same-identity watch comparison are project adaptations. No claim of an upstream full consumer component or runtime acceptance. See docs/design/SECKILL-PUBLIC-HISTORY.md.
+
+2026-10-31: Consumer real product catalog selects src/api/mall/product/spu.ts getSpuPage/getSpu request-wrapper duties; original Archer/MIT attribution retained. Existing local Shop/components/HTTP/member cart APIs and sales contracts are reused. Anonymous list/detail, text-only description, safe picture display, URL filters, single-spec zero-pair compatibility and actor-scoped original cart-version recovery are project adaptations, not a full upstream App component. No build/typecheck/runtime acceptance. See docs/design/PRODUCT-STOREFRONT-UI.md and matching port evidence.

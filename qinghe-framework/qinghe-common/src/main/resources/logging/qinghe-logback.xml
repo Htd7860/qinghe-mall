@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Adapted from local yudao-cloud trade/gateway logback-spring.xml.
+     Original authors/license retained in third-party/yudao-cloud/NOTICE.md and LICENSE.
+     Fixed application logs only; database business audit remains separate. -->
+<included>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="qinghe-app"/>
+    <springProperty scope="context" name="APP_LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+    <springProperty scope="context" name="APP_LOG_FILE" source="logging.file.name" defaultValue="${APP_LOG_PATH}/${APP_NAME}.log"/>
+    <springProperty scope="context" name="ROOT_LOG_LEVEL" source="logging.level.root" defaultValue="INFO"/>
+    <springProperty scope="context" name="LOG_MAX_FILE_SIZE" source="logging.logback.rollingpolicy.max-file-size" defaultValue="10MB"/>
+    <springProperty scope="context" name="LOG_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="30"/>
+    <springProperty scope="context" name="LOG_TOTAL_SIZE_CAP" source="logging.logback.rollingpolicy.total-size-cap" defaultValue="1GB"/>
+
+    <!-- Existing MDC only. Missing fields remain NA; no guessed user/tenant/trace identity. -->
+    <property name="QINGHE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Shanghai} %-5level [${APP_NAME}] [%thread] [trace=%X{traceId:-NA} tenant=%X{tenantId:-NA} actor=%X{actorId:-NA} order=%X{orderId:-NA} event=%X{eventId:-NA}] %logger{50} - %msg%n%ex{full}"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${QINGHE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_FILE}</file>
+        <append>true</append>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${QINGHE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>${LOG_MAX_FILE_SIZE}</maxFileSize>
+            <maxHistory>${LOG_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_TOTAL_SIZE_CAP}</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+    </appender>
+    <!-- Match upstream async file writing. No intentional low-level discard;
+         a full queue waits, and graceful shutdown gets a bounded flush window. -->
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <neverBlock>false</neverBlock>
+        <includeCallerData>false</includeCallerData>
+        <maxFlushTime>5000</maxFlushTime>
+        <appender-ref ref="FILE"/>
+    </appender>
+    <root level="${ROOT_LOG_LEVEL}">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ASYNC"/>
+    </root>
+</included>

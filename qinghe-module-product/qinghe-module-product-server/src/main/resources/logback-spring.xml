@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shared yudao-derived appender configuration; see third-party/yudao-cloud/NOTICE.md. -->
+<configuration scan="false">
+    <include resource="logging/qinghe-logback.xml"/>
+</configuration>

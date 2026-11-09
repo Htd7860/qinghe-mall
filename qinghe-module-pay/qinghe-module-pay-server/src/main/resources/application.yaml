@@ -1,0 +1,64 @@
+server:
+  address: ${PAY_BIND_ADDRESS:127.0.0.1}
+  port: ${PAY_PORT:8086}
+  forward-headers-strategy: none
+
+spring:
+  jackson:
+    deserialization:
+      accept-float-as-int: false
+  application:
+    name: qinghe-pay
+  main:
+    web-application-type: servlet
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  datasource:
+    url: ${QINGHE_PAY_DB_URL:jdbc:mysql://127.0.0.1:3306/qinghe_pay?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai}
+    username: ${QINGHE_DB_USERNAME:root}
+    password: ${QINGHE_DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 10
+      max-wait: 3000
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+qinghe:
+  order-service-auth:
+    trade-token: ${TRADE_PAY_SERVICE_TOKEN:}
+  info:
+    base-package: cn.qinghe.mall.module.pay
+  tenant:
+    enable: true
+  security:
+    remote:
+      enabled: true
+      system-base-url: ${SYSTEM_BASE_URL:http://127.0.0.1:8080}
+      connect-timeout-millis: 1000
+      read-timeout-millis: 3000
+      max-concurrent-calls: 32
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never

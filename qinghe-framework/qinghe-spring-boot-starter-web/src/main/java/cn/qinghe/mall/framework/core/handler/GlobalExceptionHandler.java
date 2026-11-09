@@ -2,6 +2,7 @@ package cn.qinghe.mall.framework.core.handler;
 
 import cn.qinghe.mall.framework.common.exception.ServiceException;
 import cn.qinghe.mall.framework.common.pojo.CommonResult;
+import cn.qinghe.mall.framework.common.util.ServiceExceptionUtil;
 import cn.qinghe.mall.framework.web.config.QingheWebExceptionProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -59,6 +60,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ServiceException.class)
     public ResponseEntity<Object> serviceExceptionHandler(ServiceException ex, WebRequest request) {
         Integer code = ex.getCode();
+        // Expected temporary unavailability must retain 503 for callers to distinguish it from a bug.
+        // Keep a fixed public message; exception details and upstream diagnostics are not exposed.
+        if (Integer.valueOf(503).equals(code)) {
+            String location = "unknown";
+            for (StackTraceElement frame : ex.getStackTrace()) {
+                if (frame.getClassName().startsWith("cn.qinghe.mall.")
+                        && !ServiceExceptionUtil.class.getName().equals(frame.getClassName())) {
+                    location = frame.getClassName() + "." + frame.getMethodName() + ":" + frame.getLineNumber();
+                    break;
+                }
+            }
+            log.warn("Service temporarily unavailable; location={}, traceId={}", location, MDC.get("traceId"));
+            return errorResponse(ex, 503, "服务暂不可用，请稍后重试",
+                    new HttpHeaders(), HttpStatus.SERVICE_UNAVAILABLE, request);
+        }
         // A malformed business exception must never turn into success or expose a system message.
         if (code == null || code <= 0 || (code >= 500 && code < 600) || UNKNOWN.getCode().equals(code)) {
             return systemFailure(ex, request);

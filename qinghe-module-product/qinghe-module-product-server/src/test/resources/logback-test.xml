@@ -1,0 +1,7 @@
+<configuration>
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder><pattern>%level %logger{36} - %msg%n</pattern></encoder>
+  </appender>
+  <!-- Real test fixtures contain no credentials; still suppress HTTP wire/SQL body debug output. -->
+  <root level="WARN"><appender-ref ref="CONSOLE"/></root>
+</configuration>
